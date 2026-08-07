@@ -24,10 +24,13 @@ def find_ffmpeg(override: str = "") -> str | None:
 
 def find_whisper_model() -> str | None:
     """Modelo ggml de Whisper si alguna app de la suite ya lo descargo."""
-    from octonove_core.config import get_data_dir as gd, models_dir
+    from octonove_core.config import models_dir
+    # candidatos construidos a mano, NO con get_data_dir: los candidatos solo
+    # se miran y get_data_dir crearia carpetas %APPDATA% vacias de otras apps
+    base = Path(os.environ.get("APPDATA") or Path.home())
     d = models_dir("SonarArchivo", shared_candidates=[
-        gd("CapturaStudio") / "models", gd("ActaLocal") / "models",
-        gd("TranscriptorIA") / "models", gd("CajaNegra") / "models"])
+        base / app / "models"
+        for app in ("CapturaStudio", "ActaLocal", "TranscriptorIA", "CajaNegra")])
     try:
         modelos = sorted(d.glob("ggml-*.bin"), key=lambda p: p.stat().st_size)
         return str(modelos[0]) if modelos else None

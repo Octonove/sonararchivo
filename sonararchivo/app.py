@@ -16,7 +16,7 @@ from tkinter import ttk, messagebox, filedialog
 from . import APP_NAME, APP_VERSION, theme
 from . import report
 from .config import AppConfig, INDEX_PATH, load_config, save_config
-from .index import Index
+from .index import abrir_recuperando
 from .scanner import Scanner, human_size
 
 logger = logging.getLogger(__name__)
@@ -37,7 +37,9 @@ class App(tk.Tk):
             pass
 
         self.cfg: AppConfig = load_config()
-        self.index = Index(str(INDEX_PATH))
+        # si indice.db esta corrupto se aparta y se recrea: sin esto la app no
+        # volveria a arrancar nunca (y el exe windowed muere sin mensaje)
+        self.index, indice_recuperado = abrir_recuperando(str(INDEX_PATH))
         self.scanner: Scanner | None = None
         self._scan_thread: threading.Thread | None = None
         self._scanning = False
@@ -47,6 +49,11 @@ class App(tk.Tk):
 
         self._build_ui()
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+        if indice_recuperado:
+            self.after(200, lambda: messagebox.showwarning(
+                APP_NAME, "El indice estaba dañado (¿apagado brusco, disco lleno?) "
+                "y se ha reiniciado.\nTus archivos no se han tocado: vuelve a "
+                "escanear para reconstruirlo."))
         self.after(300, self._first_run)
         self.after(500, self._refrescar_mapa)
 
@@ -213,6 +220,9 @@ class App(tk.Tk):
         self._refrescar_mapa()
         msg = (f"{stats['archivos']} archivos en {stats['segundos']}s "
                f"({stats['nuevos']} nuevos, {stats['reutilizados']} sin cambios)")
+        if stats.get("dirs_fallidos"):
+            msg += (f" · {stats['dirs_fallidos']} carpetas no accesibles "
+                    "(su contenido se conserva en el indice)")
         if stats.get("cancelado"):
             msg = "Escaneo cancelado. " + msg
         self._set_status(msg)
@@ -273,7 +283,10 @@ class App(tk.Tk):
         if self._closing:
             return
         n, bs = self.index.totales()
-        self.lbl_totales.config(text=f"{n:,} archivos · {human_size(bs)}".replace(",", "."))
+        # el replace de miles solo sobre el numero: human_size ya usa coma
+        # decimal y el replace global la convertia en punto ('5.2 GB')
+        self.lbl_totales.config(
+            text=f"{n:,}".replace(",", ".") + f" archivos · {human_size(bs)}")
         cats = self.index.resumen_categorias()
         rec = self.index.espacio_recuperable()
         lineas = []
@@ -383,4 +396,18 @@ class App(tk.Tk):
 def main() -> None:
     from .config import setup_logging
     setup_logging()
-    App().mainloop()
+    try:
+        App().mainloop()
+    except Exception as exc:  # noqa: BLE001
+        # el exe es windowed (sin consola): sin esto un fallo en el arranque
+        # muere en silencio, sin nada en el log ni mensaje al usuario
+        logger.exception("fallo fatal")
+        try:
+            root = tk.Tk()
+            root.withdraw()
+            messagebox.showerror(APP_NAME, f"{APP_NAME} no pudo continuar:\n{exc}\n\n"
+                                 "Revisa el log en %APPDATA%\\SonarArchivo.")
+            root.destroy()
+        except Exception:  # noqa: BLE001
+            pass
+        raise SystemExit(1)

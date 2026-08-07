@@ -90,8 +90,21 @@ class Scanner:
         self._stop = False
         self.index.comenzar_escaneo(raiz)
         n = nuevos = reutilizados = errores = 0
+        dirs_fallidos = 0
         t0 = time.time()
-        for dirpath, dirnames, filenames in os.walk(raiz):
+
+        def on_walk_error(exc: OSError) -> None:
+            # sin onerror, os.walk omite EN SILENCIO un subdirectorio que no se
+            # puede listar (permisos, antivirus, E/S de un disco viejo) y su
+            # subarbol entero quedaria con visto=0 -> la purga lo expulsaria
+            # del indice aunque los archivos existan
+            nonlocal dirs_fallidos, errores
+            dirs_fallidos += 1
+            errores += 1
+            logger.warning("no se pudo listar %s: %s",
+                           getattr(exc, "filename", "?"), exc)
+
+        for dirpath, dirnames, filenames in os.walk(raiz, onerror=on_walk_error):
             if self._stop:
                 break
             dirnames[:] = [d for d in dirnames if not _saltar_dir(d)]
@@ -131,10 +144,13 @@ class Scanner:
                     on_progreso(n, str(p))
         self.index.commit()
         # solo se purga (borra lo que ya no existe) si el escaneo se COMPLETO:
-        # cancelar a media ejecucion dejaria muchos archivos con visto=0.
-        eliminados = 0 if self._stop else self.index.purgar_no_vistos(raiz)
+        # cancelar a media ejecucion, o no poder enumerar un subdirectorio,
+        # dejaria muchos archivos con visto=0 sin haberse visitado.
+        incompleto = self._stop or dirs_fallidos > 0
+        eliminados = 0 if incompleto else self.index.purgar_no_vistos(raiz)
         return {"archivos": n, "nuevos": nuevos, "reutilizados": reutilizados,
                 "eliminados": eliminados, "errores": errores,
+                "dirs_fallidos": dirs_fallidos,
                 "segundos": round(time.time() - t0, 1), "cancelado": self._stop}
 
     def _indexar(self, p: Path, st, raiz: str) -> None:

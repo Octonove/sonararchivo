@@ -42,9 +42,16 @@ class Index:
         self.db_path = str(db_path)
         Path(self.db_path).parent.mkdir(parents=True, exist_ok=True)
         self._con = sqlite3.connect(self.db_path, check_same_thread=False)
-        self._con.execute("PRAGMA journal_mode=WAL")
-        self._lock = threading.RLock()
-        self._init()
+        try:
+            self._con.execute("PRAGMA journal_mode=WAL")
+            self._lock = threading.RLock()
+            self._init()
+        except sqlite3.Error:
+            # cerrar la conexion antes de propagar: si el fichero esta corrupto
+            # hay que poder apartarlo (Windows no deja renombrar un fichero que
+            # sigue abierto por esta misma conexion)
+            self._con.close()
+            raise
 
     def close(self) -> None:
         with self._lock:
@@ -195,3 +202,27 @@ class Index:
         with self._lock:
             self._con.executescript("DELETE FROM archivos; DELETE FROM fts;")
             self._con.commit()
+
+
+def abrir_recuperando(db_path: str) -> tuple[Index, bool]:
+    """Abre el indice; si el fichero esta danado (corte de luz durante un
+    checkpoint WAL, disco lleno, sector defectuoso) lo aparta a .bak y crea uno
+    vacio. Sin esto un indice.db corrupto impide arrancar la app PARA SIEMPRE:
+    el exe es windowed y el usuario solo ve que 'no abre'. Devuelve
+    (indice, se_recupero) para que la UI pueda avisar y pedir un reescaneo."""
+    try:
+        return Index(db_path), False
+    except sqlite3.DatabaseError:
+        logger.exception("indice corrupto en %s; se aparta y se recrea", db_path)
+        for suf in ("", "-wal", "-shm"):     # los ficheros WAL tambien: SQLite
+            p = Path(db_path + suf)          # los aplicaria sobre la BD nueva
+            try:
+                if p.exists():
+                    p.replace(p.with_name(p.name + ".bak"))
+            except OSError:
+                # si ni apartarlo se puede, borrarlo es la unica via de arranque
+                try:
+                    p.unlink(missing_ok=True)
+                except OSError:
+                    pass
+        return Index(db_path), True
