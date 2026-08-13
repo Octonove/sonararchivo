@@ -1,45 +1,54 @@
 # SonarArchivo
 
-**Encuentra lo que TIENES, no dónde lo guardaste.** 100% local. Apuntas SonarArchivo a una carpeta o disco caótico (Descargas, un disco duro viejo, un pendrive) y "emite un ping" que lee el **contenido** de tus archivos para devolverte un mapa buscable de lo que hay dentro.
+[![license](https://img.shields.io/github/license/Octonove/sonararchivo)](LICENSE)
+[![release](https://img.shields.io/github/v/release/Octonove/sonararchivo)](https://github.com/Octonove/sonararchivo/releases/latest)
+[![platform](https://img.shields.io/badge/platform-Windows%2010%2F11-1E3A5F)](https://github.com/Octonove/sonararchivo/releases/latest)
 
-## ⬇️ Descargar (Windows 10/11)
+Find files by what's INSIDE them: local full-text search over your messy folders and old drives.
 
-### ➡️ [**Descargar SonarArchivo (instalador .exe)**](https://github.com/Octonove/sonararchivo/releases/latest/download/SonarArchivo-Setup.exe)
+**Free · Open source (MIT) · 100% local — nothing ever leaves your PC · No accounts, no limits, no watermarks**
 
-Descarga **directa** del instalador, sin registro. También puedes ver la [última versión y notas](https://github.com/Octonove/sonararchivo/releases/latest).
+<img src="docs/screenshot.png" width="720" alt="SonarArchivo screenshot">
 
-> Si Windows muestra *"Windows protegió tu PC"*: pulsa **Más información → Ejecutar de todas formas**. Se instala sin permisos de administrador.
+> 🇪🇸 ¿Prefieres leerlo en español? → **[README en español](README.es.md)**
 
-## Qué hace
+## Features
 
-- **Busca por contenido, no por nombre**: el buscador de Windows no mira dentro de los archivos; SonarArchivo sí. Escribe *"presupuesto reforma"* y encuentra el PDF, el Word o la nota donde aparece, aunque no recuerdes cómo se llama.
-- **Lee muchos formatos**: texto de **PDF** (PyMuPDF), **Word/PowerPoint/Excel** (.docx/.pptx/.xlsx), páginas **HTML**, código y ficheros de texto. Y, si lo activas, **transcribe audios y vídeos** con Whisper local para buscar por lo que se dice en ellos.
-- **Mapa de lo que tienes**: cuántos archivos y cuánto ocupa cada tipo (documentos, imágenes, vídeo…).
-- **Duplicados y espacio recuperable**: detecta archivos idénticos por su firma (SHA-1) y te dice cuánto liberarías borrando las copias sobrantes.
-- **Informe PDF** del mapa para archivar o compartir.
-- **Reescaneo incremental**: la segunda vez solo lee lo que cambió, así que es rápido.
+- Indexes the **content** of PDF, Word, Excel, PowerPoint, HTML, text and code files
+- Instant search (SQLite FTS5) — find that invoice by the words inside it
+- **Duplicate detection** by hash and a disk map with reclaimable space
+- Optional Whisper transcription makes audio/video searchable too
+- Survives unreadable folders and corrupt indexes without losing your data
 
-> **Privacidad**: el índice (con el texto extraído) se guarda **solo en tu equipo** (`%APPDATA%\SonarArchivo`), nunca sale de tu PC, y puedes vaciarlo con un clic. SonarArchivo solo **lee** tus archivos; nunca los modifica, mueve ni borra.
+## Download (Windows 10/11)
 
-## Stack
+### ➡️ [**Download SonarArchivo (installer .exe)**](https://github.com/Octonove/sonararchivo/releases/latest/download/SonarArchivo-Setup.exe)
 
-Python 3 + Tkinter (ttk) · SQLite FTS5 (índice y búsqueda) · PyMuPDF (PDF) · stdlib (zip/docx/pptx/xlsx/html) · FFmpeg + Whisper opcional para audio/vídeo.
+Direct download, no sign-up. If Windows shows *"Windows protected your PC"* (normal for new unsigned apps): click **More info → Run anyway**. Installs without administrator rights.
 
-Depende del paquete compartido [`octonove-core`](https://github.com/Octonove/octonove-core) (tema, config, FFmpeg): debe estar en el `sys.path` del entorno.
+> ⭐ **If SonarArchivo is useful to you, a star on GitHub is the best way to support it — it costs nothing and helps a lot.**
 
-## Compilar
+## More free local-first tools
 
-```powershell
-.\build\build.ps1              # ejecutable (PyInstaller onedir)
-.\build\build-installer.ps1    # instalador (Inno Setup)
-```
+Every tool in this family follows the same rules: free, open source, and nothing leaves your PC.
 
-## Tests
+| Tool | What it does |
+|---|---|
+| [CapturaPro](https://github.com/Octonove/capturapro) | Screenshots, GIFs and screen recordings for Windows — annotated, watermark-free, 100% local. |
+| [TranscriptorIA](https://github.com/Octonove/transcriptor-ia) | Audio & video to text and .srt subtitles with local Whisper AI — free, private, unlimited. |
+| [PDFLocal](https://github.com/Octonove/pdflocal) | The full PDF toolbox for Windows: merge, split, compress, sign, OCR and chat with your documents — no uploads. |
+| [CajaPDF](https://github.com/Octonove/cajapdf) | The tiny PDF utility: merge, split and compress — free, offline, no accounts. |
+| [CapturaStudio](https://github.com/Octonove/capturastudio) | An OBS-style recording & streaming studio with local AI superpowers — record, stream, auto-edit. |
+| [GuiaClick](https://github.com/Octonove/guiaclick) | Record your clicks, get a step-by-step guide — annotated screenshots, blur, PDF/HTML export. Like Scribe, but local. |
+| [ActaLocal](https://github.com/Octonove/actalocal) | Meetings → minutes: local Whisper transcription plus AI summary, decisions and action items. |
+| [AutoEscritorio](https://github.com/Octonove/autoescritorio) | Trigger→action automation for Windows: watch folders, hotkeys, USB, clipboard — simple and local. |
+| [BalanceLocal](https://github.com/Octonove/balancelocal) | Your work Wrapped: where your time actually goes, as shareable cards, a PDF report and a mini-video. |
+| [CajaNegra](https://github.com/Octonove/cajanegra) | A dashcam for your PC: the last minutes of your screen, one hotkey away from a perfect incident report. |
+| [FichajeLocal](https://github.com/Octonove/fichajelocal) | A local time-clock kiosk for small business: PIN check-in, tamper-evident records, accountant-ready reports. |
+| [ITVLocal](https://github.com/Octonove/itvlocal) | An MOT-style inspection for your PC: 1–3 minutes, a 0–10 score and a PDF certificate. Inspects, never modifies. |
 
-```powershell
-python -m pytest tests/ -q
-```
+Also: **[CRBRO](https://github.com/Octonove/crbro-memory)** — persistent neural memory for AI agents (MCP server).
 
-## Licencia
+## License
 
-[MIT](LICENSE) — © 2026 Octonove.
+[MIT](LICENSE) — see also [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) where present.
