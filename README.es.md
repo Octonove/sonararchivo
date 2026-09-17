@@ -2,6 +2,11 @@
 
 **Encuentra lo que TIENES, no dónde lo guardaste.** 100% local. Apuntas SonarArchivo a una carpeta o disco caótico (Descargas, un disco duro viejo, un pendrive) y "emite un ping" que lee el **contenido** de tus archivos para devolverte un mapa buscable de lo que hay dentro.
 
+<!-- invokard-coffee -->
+**&#9749; Si esto te ahorra tiempo, inv&iacute;tame a un caf&eacute;.** [![Inv&iacute;tame a un caf&eacute; con PayPal](https://img.shields.io/badge/PayPal-Inv%C3%ADtame%20a%20un%20caf%C3%A9-00457C?logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=stradoxx%40gmail.com&no_recurring=0&currency_code=EUR&item_name=Support%20sonararchivo)
+
+**USDC** &middot; Solana `5n6Gfosk7SdwbvdtE9xiLWpcGPBBBGDZYRfAkWyCk86g` &middot; Ethereum (ERC-20) `0xe176866f9d7fdb498e0d4a983d3e34d84dcd6bfc`
+
 ## ⬇️ Descargar (Windows 10/11)
 
 ### ➡️ [**Descargar SonarArchivo (instalador .exe)**](https://github.com/Octonove/sonararchivo/releases/latest/download/SonarArchivo-Setup.exe)
